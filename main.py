@@ -1,4 +1,5 @@
 import importlib
+import os
 from functools import partial
 from multiprocessing import Process, Queue
 
@@ -6,9 +7,21 @@ from flask import Flask, request
 
 app = Flask("serverfull")
 
-bees = ["a", "b"]  # TODO: get this from somewhere
-
 workers = {}
+
+def load_bees_module_names():
+    exclude = set(["__pycache__"])
+    bee_modules = filter(
+        os.path.isdir, [
+            os.path.join("./bees/", module) for module in os.listdir("./bees/")
+        ]
+    )
+    bee_modules = set(map(os.path.basename, bee_modules))
+    bee_modules = bee_modules.difference(exclude)
+    return list(bee_modules)
+
+
+bees = load_bees_module_names()
 
 
 def bee_loop(handler, inq, outq):
